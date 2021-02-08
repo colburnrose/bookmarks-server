@@ -54,7 +54,7 @@ bookmarkRouter
     const bookmark = store.bookmarks.find((c) => c.id == id);
     if (!bookmark) {
       logger.error(`Bookmark with id ${id} does not exist.`);
-      return res.status(400).send("Bookmark Not Found.");
+      return res.status(404).send("Bookmark Not Found.");
     }
     res.json(bookmark);
   })
@@ -63,7 +63,7 @@ bookmarkRouter
     const bookmarkIndex = store.bookmarks.findIndex((bid) => bid.id == id);
     if (bookmarkIndex === -1) {
       logger.error(`Bookmark with id ${id} not found.`);
-      return res.status(400).send("Not Found!");
+      return res.status(404).send("Not Found!");
     }
     store.bookmarks.splice(bookmarkIndex, 1);
     logger.info(`Bookmark with id ${id} deleted.`);

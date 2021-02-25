@@ -6,7 +6,8 @@ const helmet = require("helmet");
 const { NODE_ENV } = require("./config");
 
 const validateBearerToken = require("./validateBearerToken");
-const bookmarkRouter = require("./routes/bookmark-router");
+// const bookmarkRouter = require("./routes/bookmark-router");
+const BookmarksServices = require("./services/bookmarks-service");
 
 const app = express();
 const morganConfiguration = NODE_ENV === "production" ? "tiny" : "common";
@@ -17,9 +18,19 @@ app.use(cors());
 app.use(express.json());
 
 // authorization
-app.use(validateBearerToken);
+// app.use(validateBearerToken);
 
 // routes
-app.use(bookmarkRouter);
+// app.use(bookmarkRouter);
+
+// GET: Return a list of books
+app.get("/bookmarks", (req, res, next) => {
+  const knexInstance = req.app.get("db");
+  BookmarksServices.getAllBookmarks(knexInstance)
+    .then((bookmarks) => {
+      res.json(bookmarks);
+    })
+    .catch(next);
+});
 
 module.exports = app;

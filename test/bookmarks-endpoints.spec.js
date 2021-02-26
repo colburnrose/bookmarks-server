@@ -3,8 +3,9 @@ const { expect } = require("chai");
 const knex = require("knex");
 const supertest = require("supertest");
 const app = require("../src/app");
+const { makeBookmarksArray } = require("./bookmarks.fixtures");
 
-describe("Bookmarks Endpoints", function () {
+describe.only("Bookmarks Endpoints", function () {
   let db;
 
   before("make knex instance", () => {
@@ -19,52 +20,56 @@ describe("Bookmarks Endpoints", function () {
 
   before("clean the table", () => db("bookmarks").truncate());
 
-  context("Given there are Bookmarks saved in the database", () => {
-    const bookmarks = [
-      {
-        id: 1,
-        title: "First Bookmark",
-        url: "https://www.google.com",
-        description: "Some bookmark description",
-        rating: 3,
-      },
-      {
-        id: 2,
-        title: "Second Bookmark",
-        url: "https://www.google.com",
-        description: "Some bookmark description",
-        rating: 4,
-      },
-      {
-        id: 3,
-        title: "Third Bookmark",
-        url: "https://www.google.com",
-        description: "Some bookmark description",
-        rating: 1,
-      },
-      {
-        id: 4,
-        title: "Fourth Bookmark",
-        url: "https://www.google.com",
-        description: "Some bookmark description",
-        rating: 5,
-      },
-      {
-        id: 5,
-        title: "Fifth Bookmark",
-        url: "https://www.google.com",
-        description: "Some bookmark description",
-        rating: 4,
-      },
-    ];
+  afterEach("cleanup", () => db("bookmarks").truncate());
 
-    beforeEach("insert bookmarks", () => {
-      return db.into("bookmarks").insert(bookmarks);
+  describe(`GET: /bookmarks`, () => {
+    context("Given there are Bookmarks saved in the database", () => {
+      const bookmarks = makeBookmarksArray();
+
+      beforeEach("insert bookmarks", () => {
+        return db.into("bookmarks").insert(bookmarks);
+      });
+
+      it("responds with 200 and all of the bookmarks", () => {
+        return supertest(app).get("/bookmarks").expect(200, bookmarks);
+      });
     });
+  });
 
-    it("GET /bookmarks responds with 200 and all of the bookmarks", () => {
-      return supertest(app).get("/bookmarks").expect(200);
-      //TODO: add more assertions about the body
+  describe(`GET /bookmarks/:bookmarkId`, () => {
+    context("Given there are Bookmarks saved in the database", () => {
+      const bookmarks = makeBookmarksArray();
+
+      beforeEach("insert bookmarks", () => {
+        return db.into("bookmarks").insert(bookmarks);
+      });
+
+      it("GET /bookmarks/:bookmarkId responds with 200 and the specific bookmark", () => {
+        const bookmarkId = 2;
+        const bookmark = bookmarks[bookmarkId - 1];
+        return supertest(app)
+          .get(`/bookmarks/${bookmarkId}`)
+          .expect(200, bookmark);
+      });
+    });
+  });
+
+  describe(`GET /articles`, () => {
+    context(`Given no bookmarks`, () => {
+      it(`responds with 200 and an empty list`, () => {
+        return supertest(app).get("/bookmarks").expect(200, []);
+      });
+    });
+  });
+
+  describe(`GET /bookmarks/:bookmarkId`, () => {
+    context(`Given no bookmarks`, () => {
+      it(`responds with 404`, () => {
+        const bookmarkId = 123456;
+        return supertest(app)
+          .get(`/bookmarks/${bookmarkId}`)
+          .expect(404, { error: { message: `Bookmark does not exist` } });
+      });
     });
   });
 });

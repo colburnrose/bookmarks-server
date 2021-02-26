@@ -4,4 +4,7 @@ module.exports = {
   API_TOKEN: process.env.API_TOKEN || "super-secret-api-tokens",
   DB_URL:
     process.env.DB_URL || "postgresql://colburnsanders@localhost/bookmarks",
+  TEST_DB_URL:
+    process.env.TEST_DB_URL ||
+    "postgresql://colburnsanders@localhost/bookmarks-test",
 };

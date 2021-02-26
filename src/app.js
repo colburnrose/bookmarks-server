@@ -33,4 +33,18 @@ app.get("/bookmarks", (req, res, next) => {
     .catch(next);
 });
 
+app.get("/bookmarks/:bookmarkId", (req, res, next) => {
+  const knexInstance = req.app.get("db");
+  BookmarksServices.getById(knexInstance, req.params.bookmarkId)
+    .then((bookmark) => {
+      if (!bookmark) {
+        return res.status(404).json({
+          error: { message: `Bookmark does not exist` },
+        });
+      }
+      res.json(bookmark);
+    })
+    .catch(next);
+});
+
 module.exports = app;

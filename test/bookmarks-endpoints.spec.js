@@ -72,4 +72,46 @@ describe.only("Bookmarks Endpoints", function () {
       });
     });
   });
+
+  describe.only(`POST /bookmarks`, () => {
+    it(`creates an bookmark, responding with 201 and the and the new bookmark`, function () {
+      return supertest(app)
+        .post("/bookmarks")
+        .send({
+          title: "New Bookmark",
+          url: "https://www.bookmarks.com",
+          description: "Test new bookmark content",
+          rating: 4,
+        })
+        .expect(201);
+    });
+  });
+
+  describe.only(`POST /bookmarks`, () => {
+    it(`creates an bookmark, responding with 201 and the and the new bookmark`, function () {
+      const bookmark = {
+        title: "New Bookmark",
+        url: "https://www.bookmarks.com",
+        description: "Test new bookmark content",
+        rating: 4,
+      };
+
+      return supertest(app)
+        .post("/bookmarks")
+        .send(bookmark)
+        .expect(201)
+        .expect((res) => {
+          expect(res.body.title).to.eql(bookmark.title);
+          expect(res.body.url).to.eql(bookmark.url);
+          expect(res.body.description).to.eql(bookmark.description);
+          expect(res.body.rating).to.eql(bookmark.rating);
+          expect(res.headers.location).to.eql(`/bookmarks/${res.body.id}`);
+        })
+        .then((postReq) => {
+          supertest(app)
+            .get(`/bookmarks/${postReq.body.id}`)
+            .expect(postReq.body);
+        });
+    });
+  });
 });

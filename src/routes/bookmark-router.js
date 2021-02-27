@@ -1,14 +1,11 @@
 const express = require("express");
-const { v4: uuid } = require("uuid");
-const { isWebUri } = require("valid-url");
-const store = require("../../store");
 const logger = require("../../logger");
-const BookmarksServices = require("../services/bookmarks-service");
+const BookmarksServices = require("./bookmarks-service");
 const bookmarkRouter = express.Router();
 const jsonParser = express.json();
 
 bookmarkRouter
-  .route("/bookmarks")
+  .route("/")
   .get((req, res, next) => {
     BookmarksServices.getAllBookmarks(req.app.get("db"))
       .then((bookmarks) => {
@@ -27,9 +24,9 @@ bookmarkRouter
   });
 
 bookmarkRouter
-  .route("/bookmarks/:id")
+  .route("/bookmarks/:bookmarkId")
   .get((req, res, next) => {
-    const id = req.params.id;
+    const id = req.params.bookmarkId;
     const knexInstance = req.app.get("db");
     BookmarksServices.getById(knexInstance, id)
       .then((bookmark) => {

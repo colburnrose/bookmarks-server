@@ -10,6 +10,7 @@ const bookmarkRouter = require("./routes/bookmark-router");
 
 const app = express();
 const morganConfiguration = NODE_ENV === "production" ? "tiny" : "common";
+// const morganConfiguration = NODE_ENV;
 // middleware
 app.use(morgan(morganConfiguration));
 app.use(helmet());

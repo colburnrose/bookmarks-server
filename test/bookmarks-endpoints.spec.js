@@ -5,7 +5,7 @@ const supertest = require("supertest");
 const app = require("../src/app");
 const { makeBookmarksArray } = require("./bookmarks.fixtures");
 
-describe.only("Bookmarks Endpoints", function () {
+describe("Bookmarks Endpoints", function () {
   let db;
 
   before("make knex instance", () => {
@@ -73,7 +73,7 @@ describe.only("Bookmarks Endpoints", function () {
     });
   });
 
-  describe.only(`POST /bookmarks`, () => {
+  describe(`POST /bookmarks`, () => {
     it(`creates an bookmark, responding with 201 and the and the new bookmark`, function () {
       return supertest(app)
         .post("/bookmarks")
@@ -87,7 +87,7 @@ describe.only("Bookmarks Endpoints", function () {
     });
   });
 
-  describe.only(`POST /bookmarks`, () => {
+  describe(`POST /bookmarks`, () => {
     it(`creates an bookmark, responding with 201 and the and the new bookmark`, function () {
       const bookmark = {
         title: "New Bookmark",

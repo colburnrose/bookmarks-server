@@ -87,6 +87,48 @@ describe("Bookmarks Endpoints", function () {
     });
   });
 
+  // POST: Validation when request doesn't contain required information
+  describe.only(`POST /bookmarks`, () => {
+    it(`responds with 400 and an error message when the title is missing`, () => {
+      return supertest(app)
+        .post("/bookmarks")
+        .send({
+          url: "https://www.bookmarks.com",
+          description: "Test new bookmark content",
+          rating: 4,
+        })
+        .expect(400, {
+          error: { message: `Missing 'title' in request body` },
+        });
+    });
+
+    it(`responds with 400 and an error message when the url is missing`, () => {
+      return supertest(app)
+        .post("/bookmarks")
+        .send({
+          title: "Test title",
+          description: "Test new bookmark content",
+          rating: 4,
+        })
+        .expect(400, {
+          error: { message: `Missing 'url' in request body` },
+        });
+    });
+
+    it(`responds with 400 and an error message when the rating is missing`, () => {
+      return supertest(app)
+        .post("/bookmarks")
+        .send({
+          title: "Test title",
+          url: "https://www.bookmarks.com",
+          description: "Test new bookmark content",
+        })
+        .expect(400, {
+          error: { message: `Missing 'rating' in request body` },
+        });
+    });
+  });
+
   describe(`POST /bookmarks`, () => {
     it(`creates an bookmark, responding with 201 and the and the new bookmark`, function () {
       const bookmark = {

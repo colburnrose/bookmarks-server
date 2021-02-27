@@ -16,6 +16,25 @@ bookmarkRouter
   .post(jsonParser, (req, res, next) => {
     const { title, url, description, rating } = req.body;
     const bookmark = { title, url, description, rating };
+
+    if (!title) {
+      return res.status(400).json({
+        error: { message: `Missing 'title' in request body` },
+      });
+    }
+
+    if (!url) {
+      return res.status(400).json({
+        error: { message: `Missing 'url' in request body` },
+      });
+    }
+
+    if (!rating) {
+      return res.status(400).json({
+        error: { message: `Missing 'rating' in request body` },
+      });
+    }
+
     BookmarksServices.insertBookmarks(req.app.get("db"), bookmark)
       .then((bookmark) => {
         res.status(201).location(`/bookmarks/${bookmark.id}`).json(bookmark);

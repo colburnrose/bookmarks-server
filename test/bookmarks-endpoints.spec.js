@@ -23,6 +23,12 @@ describe("Bookmarks Endpoints", function () {
   afterEach("cleanup", () => db("bookmarks").truncate());
 
   describe(`GET: /bookmarks`, () => {
+    context(`Given no bookmarks`, () => {
+      it(`responds with 200 and an empty list`, () => {
+        return supertest(app).get("/bookmarks").expect(200, []);
+      });
+    });
+
     context("Given there are Bookmarks saved in the database", () => {
       const bookmarks = makeBookmarksArray();
 
@@ -37,6 +43,14 @@ describe("Bookmarks Endpoints", function () {
   });
 
   describe(`GET /bookmarks/:bookmarkId`, () => {
+    context(`Given no bookmarks`, () => {
+      it(`responds with 404`, () => {
+        const bookmarkId = 123456;
+        return supertest(app)
+          .get(`/articles/${bookmarkId}`)
+          .expect(404, { error: { message: `Bookmark doesn't exist` } });
+      });
+    });
     context("Given there are Bookmarks saved in the database", () => {
       const bookmarks = makeBookmarksArray();
 
@@ -44,7 +58,7 @@ describe("Bookmarks Endpoints", function () {
         return db.into("bookmarks").insert(bookmarks);
       });
 
-      it("GET /bookmarks/:bookmarkId responds with 200 and the specific bookmark", () => {
+      it("responds with 200 and the specified bookmarks", () => {
         const bookmarkId = 2;
         const bookmark = bookmarks[bookmarkId - 1];
         return supertest(app)
@@ -54,87 +68,12 @@ describe("Bookmarks Endpoints", function () {
     });
   });
 
-  describe(`GET /articles`, () => {
-    context(`Given no bookmarks`, () => {
-      it(`responds with 200 and an empty list`, () => {
-        return supertest(app).get("/bookmarks").expect(200, []);
-      });
-    });
-  });
-
-  describe(`GET /bookmarks/:bookmarkId`, () => {
-    context(`Given no bookmarks`, () => {
-      it(`responds with 404`, () => {
-        const bookmarkId = 123456;
-        return supertest(app)
-          .get(`/bookmarks/${bookmarkId}`)
-          .expect(404, { error: { message: `Bookmark does not exist` } });
-      });
-    });
-  });
-
   describe(`POST /bookmarks`, () => {
     it(`creates an bookmark, responding with 201 and the and the new bookmark`, function () {
-      return supertest(app)
-        .post("/bookmarks")
-        .send({
-          title: "New Bookmark",
-          url: "https://www.bookmarks.com",
-          description: "Test new bookmark content",
-          rating: 4,
-        })
-        .expect(201);
-    });
-  });
-
-  // POST: Validation when request doesn't contain required information
-  describe.only(`POST /bookmarks`, () => {
-    it(`responds with 400 and an error message when the title is missing`, () => {
-      return supertest(app)
-        .post("/bookmarks")
-        .send({
-          url: "https://www.bookmarks.com",
-          description: "Test new bookmark content",
-          rating: 4,
-        })
-        .expect(400, {
-          error: { message: `Missing 'title' in request body` },
-        });
-    });
-
-    it(`responds with 400 and an error message when the url is missing`, () => {
-      return supertest(app)
-        .post("/bookmarks")
-        .send({
-          title: "Test title",
-          description: "Test new bookmark content",
-          rating: 4,
-        })
-        .expect(400, {
-          error: { message: `Missing 'url' in request body` },
-        });
-    });
-
-    it(`responds with 400 and an error message when the rating is missing`, () => {
-      return supertest(app)
-        .post("/bookmarks")
-        .send({
-          title: "Test title",
-          url: "https://www.bookmarks.com",
-          description: "Test new bookmark content",
-        })
-        .expect(400, {
-          error: { message: `Missing 'rating' in request body` },
-        });
-    });
-  });
-
-  describe(`POST /bookmarks`, () => {
-    it(`creates an bookmark, responding with 201 and the and the new bookmark`, function () {
+      this.retries(3);
       const bookmark = {
         title: "New Bookmark",
         url: "https://www.bookmarks.com",
-        description: "Test new bookmark content",
         rating: 4,
       };
 
@@ -145,15 +84,31 @@ describe("Bookmarks Endpoints", function () {
         .expect((res) => {
           expect(res.body.title).to.eql(bookmark.title);
           expect(res.body.url).to.eql(bookmark.url);
-          expect(res.body.description).to.eql(bookmark.description);
           expect(res.body.rating).to.eql(bookmark.rating);
           expect(res.headers.location).to.eql(`/bookmarks/${res.body.id}`);
         })
-        .then((postReq) => {
-          supertest(app)
-            .get(`/bookmarks/${postReq.body.id}`)
-            .expect(postReq.body);
+        .then((res) => {
+          supertest(app).get(`/bookmarks/${res.body.id}`).expect(res.body);
         });
+    });
+    const requiredFields = ["title", "url", "rating"];
+
+    requiredFields.forEach((field) => {
+      const bookmark = {
+        title: "Test title",
+        url: "https://www.bookmarks.com",
+        rating: 4,
+      };
+
+      it(`responds with 400 and an error message when the '${field}' is missing`, () => {
+        delete bookmark[field];
+        return supertest(app)
+          .post("/bookmarks")
+          .send(bookmark)
+          .expect(400, {
+            error: { message: `Missing '${field}' in request body` },
+          });
+      });
     });
   });
 });

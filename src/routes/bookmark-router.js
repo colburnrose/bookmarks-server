@@ -14,25 +14,15 @@ bookmarkRouter
       .catch(next);
   })
   .post(jsonParser, (req, res, next) => {
-    const { title, url, description, rating } = req.body;
-    const bookmark = { title, url, description, rating };
+    const { title, url, rating } = req.body;
+    const bookmark = { title, url, rating };
 
-    if (!title) {
-      return res.status(400).json({
-        error: { message: `Missing 'title' in request body` },
-      });
-    }
-
-    if (!url) {
-      return res.status(400).json({
-        error: { message: `Missing 'url' in request body` },
-      });
-    }
-
-    if (!rating) {
-      return res.status(400).json({
-        error: { message: `Missing 'rating' in request body` },
-      });
+    for (const [key, value] of Object.entries(bookmark)) {
+      if (value == null) {
+        return res.status(400).json({
+          error: { message: `Missing '${key}' in request body` },
+        });
+      }
     }
 
     BookmarksServices.insertBookmarks(req.app.get("db"), bookmark)

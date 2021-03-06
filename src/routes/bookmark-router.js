@@ -1,10 +1,9 @@
 const express = require("express");
-const { isWebUri } = require("valid-url");
-const logger = require("../../logger");
 const BookmarksServices = require("./bookmarks-service");
 const bookmarkRouter = express.Router();
 const jsonParser = express.json();
 const xss = require("xss");
+const path = require("path");
 
 const serializeBookmark = (bookmark) => ({
   id: bookmark.id,
@@ -39,7 +38,7 @@ bookmarkRouter
       .then((bookmark) => {
         res
           .status(201)
-          .location(`/bookmarks/${bookmark.id}`)
+          .location(path.posix.join(req.originalUrl + `/${bookmark.id}`))
           .json(serializeBookmark(bookmark));
       })
       .catch(next);

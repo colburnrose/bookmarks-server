@@ -23,4 +23,9 @@ app.use(express.json());
 // routes
 app.use("/bookmarks", bookmarkRouter);
 
+app.get("/xss", (req, res) => {
+  res.cookie("secretToken", "1234567890");
+  res.sendFile(__dirname + "/xss-example.html");
+});
+
 module.exports = app;

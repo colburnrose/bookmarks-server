@@ -21,7 +21,7 @@ app.use(express.json());
 // app.use(validateBearerToken);
 
 // routes
-app.use("/bookmarks", bookmarkRouter);
+app.use("/api/bookmarks", bookmarkRouter);
 
 app.get("/xss", (req, res) => {
   res.cookie("secretToken", "1234567890");
